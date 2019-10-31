@@ -20,4 +20,4 @@ Also, there will be 4 text files in `./data`, each containing the path to images
 The `produce_info_json.py` writes the mean and standard deviation of the images to `info.json`. This is already provided.
 
 ## Training/ eavaluating
-Refer to script.md
+Refer to [script.md](https://github.com/cpwan/steel-defect-detection/blob/drn/script.md)
