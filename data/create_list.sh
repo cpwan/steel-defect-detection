@@ -1,0 +1,1 @@
+find mask/train -maxdepth 3 -name "*.png" | sort > train_labels.txt ;find mask/test -maxdepth 3 -name "*.png" | sort > val_labels.txt;find mask/train -maxdepth 3 -name "*.png" | sort |sed -e 's/mask\/train/img/' |sed -e 's/png/jpg/' > train_images.txt;find mask/test -maxdepth 3 -name "*.png" | sort |sed -e 's/mask\/test/img/' |sed -e 's/png/jpg/' > val_images.txt;echo 'done'
