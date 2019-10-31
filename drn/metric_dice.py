@@ -1,10 +1,9 @@
 import torch
 
-'''	taken from :https://www.kaggle.com/wh1tezzz/correct-dice-metrics-for-this-competition
-'''
 def dice_channel_torch(probability, truth, threshold):
-    # probability=probability.cuda()
-    # truth=truth.cuda()
+    """	
+    credit: https://www.kaggle.com/wh1tezzz/correct-dice-metrics-for-this-competition
+    """
     batch_size = truth.shape[0]
     channel_num = truth.shape[1]
     mean_dice_channel = torch.Tensor([0.]).cuda()
@@ -12,13 +11,14 @@ def dice_channel_torch(probability, truth, threshold):
         for i in range(batch_size):
             for j in range(channel_num):
                 t=truth[i, j, :, :]
-#                if t.sum()==0:
-#                    continue
                 channel_dice = dice_single_channel(probability[i, j,:,:], truth[i, j, :, :], threshold)
                 mean_dice_channel += channel_dice/(batch_size * channel_num)
     return mean_dice_channel
 
 def dice_single_channel(probability, truth, threshold, eps = 1E-9):
+    """	
+    credit: https://www.kaggle.com/wh1tezzz/correct-dice-metrics-for-this-competition
+    """
     p = (probability.view(-1) > threshold).float()
     t = (truth.view(-1) > 0.5).float()
     dice = (2.0 * (p * t).sum() +eps)/ (p.sum() + t.sum() + eps)
@@ -35,38 +35,6 @@ def dice(output, target):
     return out.item()
 
 
-#def dice(output,target, ignore_index=255):
-#   """
-#    output : NxCxHxW Variable
-#    target :  NxHxW LongTensor
-#    ignore_index : int index to ignore from loss
-#    """
-#    eps = 0.0001
-
-  #  #output = output.exp()
- #   encoded_target = output.detach() * 0
- #   if ignore_index is not None:
- #       mask = target == ignore_index
- #       target = target.clone()
-#        target[mask] = 0
-#        encoded_target.scatter_(1, target.unsqueeze(1), 1)
-#        mask = mask.unsqueeze(1).expand_as(encoded_target)
-#        encoded_target[mask] = 0
-#    else:
-#        encoded_target.scatter_(1, target.unsqueeze(1), 1)
-
-#    intersection = output * encoded_target
-#    numerator = 2 * intersection.sum(0).sum(1).sum(1)
-#    denominator = output + encoded_target
-
- #   if ignore_index is not None:
- #       denominator[mask] = 0
- #   denominator = denominator.sum(0).sum(1).sum(1) + eps
- #   loss_per_channel =   (1 - (numerator / denominator))
-#    loss_avg=loss_per_channel.sum() / output.size(1)
-#
-
-#    return loss_avg
 
 def dice_loss(output, target, weight=None, ignore_index=None, reduction='mean'):
     """
@@ -74,6 +42,8 @@ def dice_loss(output, target, weight=None, ignore_index=None, reduction='mean'):
     target :  NxHxW LongTensor
     weights : C FloatTensor
     ignore_index : int index to ignore from loss
+    ---
+    credit: https://discuss.pytorch.org/t/one-hot-encoding-with-autograd-dice-loss/9781/5
     """
     eps = 0.0001
 
@@ -103,7 +73,7 @@ def dice_loss(output, target, weight=None, ignore_index=None, reduction='mean'):
 #    dice_avg=dice_per_channel.sum() / output.size(1)
     bceLoss=torch.nn.functional.binary_cross_entropy(output, encoded_target)
     #return loss_avg+bceLoss
-    return bceLoss
+    return bceLoss # returning BCELoss instead, empirically BCELoss alone gives a better traning
 
 
 class DICELoss(torch.nn.modules.loss._WeightedLoss):
