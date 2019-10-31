@@ -1,4 +1,4 @@
-# Steel detection with context aggregated network
+# Steel defect detection with context aggregated network
 
 credit to https://github.com/fyu/drn
 
