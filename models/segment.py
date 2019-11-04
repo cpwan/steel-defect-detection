@@ -27,6 +27,8 @@ import drn
 import data_transforms as transforms
 
 import metric_dice
+from tensorboardX import SummaryWriter
+
 
 try:
     from modules import batchnormsync
@@ -37,7 +39,7 @@ FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
+writer = SummaryWriter()
 
 CITYSCAPE_PALETTE = np.asarray([
     [66, 133, 244],
@@ -317,7 +319,8 @@ def train(train_loader, model, criterion, optimizer, epoch,
                         'Score {top1.val:.3f} ({top1.avg:.3f})'.format(
                 epoch, i, len(train_loader), batch_time=batch_time,
                 data_time=data_time, loss=losses, top1=scores))
-
+        writer.add_scalar('drn/train/log-loss',losses.avg,epoch)
+        writer.add_scalar('drn/train/dice-score',scores.avg, epoch)
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
@@ -414,6 +417,10 @@ def train_seg(args):
         # evaluate on validation set
         prec1 = validate(val_loader, model, criterion, eval_score=accuracy)
 
+
+        writer.add_scalar('drn/val/dice-score',prec1, epoch)
+
+
         is_best = prec1 > best_prec1
         best_prec1 = max(prec1, best_prec1)
         checkpoint_path = 'checkpoint_latest.pth.tar'
@@ -481,6 +488,7 @@ def save_colorful_images(predictions, filenames, output_dir, palettes):
        if not exists(out_dir):
            os.makedirs(out_dir)
        im.save(fn)
+
 def process_output(out):
     out=torch.cat((out,torch.ones(out.shape[0],1,out.shape[2],out.shape[3],device=out.device)*0.5),1)
     _, out = torch.max(out, 1)
@@ -604,6 +612,9 @@ def test_ms(eval_data_loader, model, num_classes, scales,
                     'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                     .format(iter, len(eval_data_loader), batch_time=batch_time,
                             data_time=data_time))
+
+
+
     if has_gt: #val
         ious = per_class_iu(hist) * 100
         logger.info(' '.join('{:.03f}'.format(i) for i in ious))
