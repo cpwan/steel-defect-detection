@@ -187,7 +187,7 @@ def validate(val_loader, model, criterion, eval_score=None, print_freq=10):
 
     logger.info(' * Score {top1.avg:.3f}'.format(top1=score))
 
-    return score.avg
+    return (score.avg , losses.avg)
 
 
 class AverageMeter(object):
@@ -269,7 +269,8 @@ def train(train_loader, model, criterion, optimizer, epoch,
             
             # Log scores and losses per 'print_freq' iterations here (with tensorboardX ?)
             ########
-            
+            writer.add_scalar('drn/train/log-loss',losses.avg.epoch)
+            writer.add_scalar('drn/train/log-score',scores.avg.epoch)            
             ########
 
 
@@ -365,7 +366,7 @@ def train_seg(args):
               eval_score=accuracy)
 
         # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion, eval_score=accuracy)
+        (prec1,val1) = validate(val_loader, model, criterion, eval_score=accuracy)
 
         is_best = prec1 > best_prec1
         best_prec1 = max(prec1, best_prec1)
@@ -382,7 +383,8 @@ def train_seg(args):
         
         # Log scores and losses per epoch here (with tensorboardX ?)
         ########
-        
+        writer.add_scalar('drn/val/validate-loss',prec1,epoch)
+        writer.add_scalar('drn/val/validate-score',val1,epoch)      
         ########
 
 
