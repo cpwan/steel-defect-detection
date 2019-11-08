@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+.block {
+  display: block;
+  width: 10%;
+  height: 100vh;
+  border: none;
+  background-color: #ddd;
+  color: black;
+  padding: 10px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.block:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.column{
+float: left;
+padding: 10px
+}
+
+
+
+.container:after{
+  content: ""; 
+  display: table;
+  clear:both;
+}
+
+
+</style>
+    <body>
+      <div class= "container">
+        <form method="post" action="/">
+	    <input class ="column block" type="submit" name="submit_btn" value="previous">
+
+        </form>
+        <div class="column main">
+        <h1>Original image ({{path_to_img}})</h1>
+        <img src=./data/img/{{path_to_img}}.jpg />
+        <h1>Label</h1>
+        <img src=./data/mask_colored/test/{{path_to_img}}.png />
+        <h1>Prediction</h1>
+        <img src=./data/drn_d_22_200_val_color/img/{{path_to_img}}.png />
+        </div>
+
+        <form method="post" action="/">
+
+	    <input class ="column block" type="submit" name="submit_btn" value="next">
+        </form>
+
+       </div>
+    </body>
+</html>
