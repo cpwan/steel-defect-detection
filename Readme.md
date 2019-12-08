@@ -1,6 +1,12 @@
-# Steel defect detection with context aggregated network
+# Steel defect detection with U-net and CAN
 
-credit to https://github.com/fyu/drn
+reference: 
+
+> [U-net:   Convolutional  networks  for  biomedical  image  segmentation](https://arxiv.org/abs/1505.04597)
+
+> [Dilated Residual Networks](https://arxiv.org/abs/1705.09914)
+
+Code structure modified on top of https://github.com/fyu/drn
 
 ## Proprocess
 
@@ -21,3 +27,5 @@ The `produce_info_json.py` writes the mean and standard deviation of the images 
 
 ## Training/ eavaluating
 Refer to [script.md](https://github.com/cpwan/steel-defect-detection/blob/drn/script.md)
+
+
