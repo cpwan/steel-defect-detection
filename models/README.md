@@ -1,5 +1,5 @@
 # Credit
-This is largely based on https://github.com/fyu/drn.
+The codes are modified on top of https://github.com/fyu/drn.
 
 # Changes w.r.t. the original implementation
 - added dice loss and dice score in `metric_dice.py`
