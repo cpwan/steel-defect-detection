@@ -1,6 +1,9 @@
 # Steel defect detection with U-net and CAN
 
-reference: 
+## Report
+Our report can be found [here](https://github.com/cpwan/steel-defect-detection/blob/drn/Steel%20defect%20detection%20with%20deep%20semantic%20segmentation.pdf)
+
+## References
 
 > [U-net:   Convolutional  networks  for  biomedical  image  segmentation](https://arxiv.org/abs/1505.04597)
 
