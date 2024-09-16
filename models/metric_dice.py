@@ -1,4 +1,5 @@
 import torch
+import math
 
 def dice_channel_torch(probability, truth, threshold):
     """	
@@ -36,7 +37,7 @@ def dice(output, target):
 
 
 
-def dice_loss(output, target, weight=None, ignore_index=None, reduction='mean'):
+def dice_loss(output, target, weight=None, ignore_index=None, reduction='mean', under_threshold_loss=False):
     """
     output : NxCxHxW Variable
     target :  NxHxW LongTensor
@@ -71,18 +72,32 @@ def dice_loss(output, target, weight=None, ignore_index=None, reduction='mean'):
 #    denominator = denominator.sum(0).sum(1).sum(1) + eps
 #    dice_per_channel = weight *  (numerator / denominator)
 #    dice_avg=dice_per_channel.sum() / output.size(1)
-    bceLoss=torch.nn.functional.binary_cross_entropy(output, encoded_target)
-    #return loss_avg+bceLoss
-    return bceLoss # returning BCELoss instead, empirically BCELoss alone gives a better traning
+
+    # Boolean tensor (size = NxHxW). For each cell, true => at least one prediction of four defect classes is above the threhold (0.5)
+    over_thr_pixels = torch.max(output, 1).values >= 0.5
+
+    # Boolean tensor (size = NxHxW). The neglation of `over_thr_piexls`
+    under_thr_pixels = ~over_thr_pixels
+
+    # Boolean tensor (size = Nx4xHxW)
+    over_thr_mask = over_thr_pixels.unsqueeze(1).expand_as(encoded_target)
+    
+    # BCE loss of pixels which are above threshold
+    bceLoss=torch.nn.functional.binary_cross_entropy(output[over_thr_mask], encoded_target[over_thr_mask])
+    
+    # Constant loss of pixels which are below threshold
+    under_thr_loss = torch.sum(under_thr_pixels) * -math.log(0.25)
+    return bceLoss + under_thr_loss
 
 
 class DICELoss(torch.nn.modules.loss._WeightedLoss):
     __constants__ = ['ignore_index', 'weight', 'reduction']
 
     def __init__(self, weight=None, size_average=None, ignore_index=-100,
-                 reduce=None, reduction='mean'):
+                 reduce=None, reduction='mean', under_threshold_loss=False):
         super(DICELoss, self).__init__(weight, size_average, reduce, reduction)
         self.ignore_index = ignore_index
+        self.under_threshold_loss = under_threshold_loss
 
     def forward(self, input, target):
-        return dice_loss(input, target, weight=self.weight, ignore_index=self.ignore_index, reduction=self.reduction)
+        return dice_loss(input, target, weight=self.weight, ignore_index=self.ignore_index, reduction=self.reduction, under_threshold_loss=self.under_threshold_loss)
