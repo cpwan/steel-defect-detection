@@ -213,7 +213,7 @@ def accuracy(output,target):
 
 
 def train(train_loader, model, criterion, optimizer, epoch,
-          eval_score=None, print_freq=10):
+          eval_score=None, print_freq=10,argsclass):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -270,7 +270,14 @@ def train(train_loader, model, criterion, optimizer, epoch,
             # Log scores and losses per 'print_freq' iterations here (with tensorboardX ?)
             ########
             writer.add_scalar('drn/train/log-loss',losses.avg.epoch)
-            writer.add_scalar('drn/train/log-score',scores.avg.epoch)            
+            writer.add_scalar('drn/train/log-score',scores.avg.epoch)
+            predTest = input.cpu()
+            predTest = process_output(input)
+            predTest = input.cpu().data.numpy()
+            save_colorful_images(
+                predTest, target, 'trainTest' + '_color',
+                TRIPLET_PALETTE if argsclass == 3 else CITYSCAPE_PALETTE)
+            winter.add_image('epoch'+epoch, image)
             ########
 
 
@@ -363,7 +370,7 @@ def train_seg(args):
         logger.info('Epoch: [{0}]\tlr {1:.06f}'.format(epoch, lr))
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch,
-              eval_score=accuracy)
+              eval_score=accuracy,args.classes)
 
         # evaluate on validation set
         (prec1,val1) = validate(val_loader, model, criterion, eval_score=accuracy)
